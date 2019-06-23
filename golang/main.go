@@ -18,9 +18,25 @@ func main(){
 	v1:=r.Group("/v1")
 	{
 		v1.GET("/hello", HelloPage)
-		v1.GET("/hllo/:name", func(c *gin.Context){
+		v1.GET("/hello/:name", func(c *gin.Context){
 			name:=c.Param("name")
 			c.String(http.StatusOK, "Hello %s", name)
+		})
+		// 匹配的url格式:  /hello2?firstname=Jane&lastname=Doe
+		// curl "localhost:8000/v1/hello2?firstname=Jane&lastname=Doe"
+		v1.GET("/hello2", func(c *gin.Context){
+			// firstname := c.DefaultQuery("firstname", "Guest")
+			firstname:=c.Query("firstname")
+        	lastname:= c.Query("lastname") // 是 c.Request.URL.Query().Get("lastname") 的简写
+
+        	c.String(http.StatusOK, "Hello %s %s", firstname, lastname)
+		})
+		v1.GET("/hello3/:name", func(c *gin.Context){
+			name:=c.Param("name")
+			firstname:=c.Query("firstname")
+        	lastname:= c.Query("lastname") // 是 c.Request.URL.Query().Get("lastname") 的简写
+
+        	c.String(http.StatusOK, "Hello %s %s %s", name, firstname, lastname)
 		})
 		
 		v1.GET("/line", func(c *gin.Context){
@@ -32,6 +48,19 @@ func main(){
 				"legend_data":legendData,
 				"xAxisData":xAxisData,
 			})
+		})
+		//curl -X POST localhost:8000/v1/hello4 -H "Content-Type:application/x-www-form-urlencoded" -d "message=hello&nick=rsj217" | python -m json.tool % Total % Received % Xferd 
+		v1.POST("/hello4", func(c *gin.Context){
+			message := c.PostForm("message") 
+        	nick := c.DefaultPostForm("nick", "anonymous") 
+        	c.JSON(http.StatusOK, gin.H{ 
+            	"status": gin.H{ 
+                "status_code": http.StatusOK, 
+                "status": "ok", 
+            	}, 
+            	"message": message, 
+            	"nick": nick,         
+        	}) 
 		})
 
 		//定义默认路由
